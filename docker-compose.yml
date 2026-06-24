@@ -1,0 +1,17 @@
+# version:"3.8"
+
+services:
+  redis:
+    image: redis:7-alpine.
+    container_name: devdock-redis
+
+    ports:
+      - "6379:6379"
+
+    restart: unless-stopped
+
+    volumes:
+        - ./data/redis:/data
+
+volumes:
+  redis_data:     

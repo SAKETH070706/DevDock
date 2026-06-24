@@ -1,0 +1,30 @@
+{
+  "name": "serverside",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "axios": "^1.18.1",
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "ioredis": "^5.11.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.7.0",
+    "morgan": "^1.11.0",
+    "nodemailer": "^9.0.1",
+    "nodemon": "^3.1.14",
+    "redis": "^6.0.0",
+    "socket.io": "^4.8.3",
+    "uuid": "^14.0.0",
+    "zod": "^4.4.3"
+  }
+}
