@@ -49,7 +49,7 @@ const Login = () => {
 
       <br />
       <br />
-
+      <Link to="/forgot-password"> Forgot Password?</Link><br></br>
       <Link to="/register">Create Account</Link>
     </div>
   );

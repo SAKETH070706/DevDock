@@ -83,12 +83,13 @@ export const disbandRoomController=async(req,res)=>{
 export const leaveRoomController=async(req,res)=>
 {
     try{
-        const{roomId}=req.body;
+        const{roomId}=req.params;
 
         const room=await leaveRoom(roomId,req.user._id);
         
         return res.status(200).json({
                 success: true,
+                message:"Left room successfully",
                 room
             });
 

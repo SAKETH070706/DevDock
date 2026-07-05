@@ -12,7 +12,7 @@ router.post("/create",authMiddleware,createRoomController);
 router.post("/join",authMiddleware,joinRoomController);
 router.get("/:roomId",authMiddleware,getRoomController);
 router.delete("/:roomId",authMiddleware,disbandRoomController);
-router.post("/leave",authMiddleware,leaveRoomController);
+router.post("/:roomId/leave",authMiddleware,leaveRoomController);
 router.put("/:roomId/code",authMiddleware,saveCodeController);
 router.get("/history/:roomId",authMiddleware,getHistoryController);
 router.put("/:roomId/language",authMiddleware,updateLanguageController);

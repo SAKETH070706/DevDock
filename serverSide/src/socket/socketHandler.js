@@ -1,4 +1,5 @@
 import redis from "../config/redis.js";
+import Room from "../models/roomModel.js";
 
 const socketHandler = (io) => {
   io.on("connection", (socket) => {
@@ -10,7 +11,7 @@ const socketHandler = (io) => {
       socket.data.roomId = roomId;
       socket.data.userId = userId;
       await redis.sadd(`room:${roomId}:users`, userId);
-
+      io.to(roomId).emit("participants-updated");
       const onlineUsers = await redis.smembers(`room:${roomId}:users`);
       io.to(roomId).emit("online-users", onlineUsers);
 
@@ -20,22 +21,30 @@ const socketHandler = (io) => {
     socket.on("leave-room", async ({ roomId, userId }) => {
       socket.leave(roomId);
       await redis.srem(`room:${roomId}:users`, userId);
+      io.to(roomId).emit("participants-updated");
 
       const onlineUsers = await redis.smembers(`room:${roomId}:users`);
       io.to(roomId).emit("online-users", onlineUsers);
 
-      
+      io.to(roomId).emit("participants-updated");
     });
 
     socket.on("chat-message",async({roomId,userId,username,message})=>{
         io.to(roomId).emit("chat-message",{userId,username,message,timestamp:Date.now()});
     })
-
-    socket.on("code-change",({roomId,code})=>{
-        socket.to(roomId).emit("code-update",code);
+   
+    socket.on("yjs-update",({roomId,update})=>{
+        socket.to(roomId).emit("yjs-update",{update});
     });
-    
-    socket.on("language-change",({roomId,language})=>{
+
+    socket.on("awareness-update",({roomId,update})=>{
+        socket.to(roomId).emit("awareness-update",{update});
+    });
+
+    socket.on("language-change",async({roomId,language})=>{
+        const room=await Room.findById(roomId);
+        if(!room) return ;
+        if(room.host.toString()!== socket.data.userId) return ;
         socket.to(roomId).emit("language-update",language);
     });
 
@@ -54,5 +63,7 @@ const socketHandler = (io) => {
     });
   });
 };
+
+
 
 export default socketHandler;

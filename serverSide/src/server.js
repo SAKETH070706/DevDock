@@ -1,6 +1,8 @@
+import dns from "dns";
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
+
 import dotenv from "dotenv";
 dotenv.config();
-
 
 import express from "express";
 import cors from "cors";
@@ -19,11 +21,11 @@ const server=http.createServer(app);
 
 const io=new Server(server,{
     cors:{
-        origin:"http://localhost:5173",
+        origin:"http://192.168.0.4:5173",
         methods:["GET","POST"]
     }
 });
-
+app.set("io", io);
 
 app.use(cors());
 app.use(express.json());
@@ -39,14 +41,9 @@ socketHandler(io);
 
 const PORT = process.env.PORT || 5000;
 
-server.listen(PORT, () => {
+server.listen(PORT,"0.0.0.0", () => {
     console.log(
         `Server running on port ${PORT}`
     );
 });
 
-app.listen(PORT, () => {
-    console.log(
-        `Server running on port ${PORT}`
-    );
-});

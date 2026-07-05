@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:5000/api/rooms",
+  baseURL: "http://192.168.0.4:5000/api/rooms",
 });
 
 API.interceptors.request.use((config) => {
@@ -16,7 +16,7 @@ export const createRoom = (data) => API.post("/create", data);
 export const joinRoom = (data) => API.post("/join", data);
 export const getRoom = (roomId) => API.get(`/${roomId}`);
 export const getHistory=(roomId)=>API.get( `/history/${roomId}`);
-export const leaveRoom = (data) => API.post("/leave", data);
+export const leaveRoom = (roomId) => API.post(`/${roomId}/leave`);
 export const disbandRoom = (roomId) => API.delete(`/${roomId}`);
 export const saveCode=(roomId,code)=>API.put(`/${roomId}/code`,{code});
 export const updateLanguage=(roomId,language)=>API.put(`/${roomId}/language`,{language});

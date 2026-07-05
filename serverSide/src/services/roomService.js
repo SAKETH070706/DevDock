@@ -71,7 +71,7 @@ export const disbandRoom=async(roomId,userId)=>{
     }
 
     await redis.del(`room:${room.inviteCode}`);
-
+    await redis.del(`room:${roomId}:users`);
     await Room.findByIdAndDelete(roomId);
 
     return {

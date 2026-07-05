@@ -1,13 +1,12 @@
 import MonacoEditor from "@monaco-editor/react";
 
-const Editor = ({ language, code, onChange }) => {
+const Editor = ({ language,onMount }) => {
   return (
     <MonacoEditor
       height="100%"
       language={language}
       theme="vs-dark"
-      value={code}
-      onChange={onChange}
+      onMount={onMount}
       options={{
         minimap: { enabled: false },
         fontSize: 24,

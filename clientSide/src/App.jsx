@@ -6,7 +6,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import CreateRoom from "./pages/CreateRoom";
 import JoinRoom from "./pages/JoinRoom";
 import Room from "./pages/Room";
-
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 function App(){
     return(
@@ -14,6 +15,10 @@ function App(){
   <Route path="/" element={<Navigate to="/login" />} />
 
   <Route path="/login" element={<Login />} />
+
+   <Route path="/forgot-password" element={<ForgotPassword />} />
+
+   <Route path="/reset-password" element={<ResetPassword />} />
 
   <Route path="/register" element={<Register />} />
 

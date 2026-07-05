@@ -20,7 +20,7 @@ export const resendOTPController=async(req,res)=>
 {
     try{
         const {email}=req.body;
-        const result=await resednOTP(email);
+        const result=await resendOTP(email);
         res.status(200).json(result);
     }
     catch(error){
@@ -81,6 +81,7 @@ export const loginController=async(req,res)=>{
 export const forgotPasswordController=async(req,res)=>{
     try{
 
+         
     const { email } = req.body;
 
         const result =
@@ -89,7 +90,8 @@ export const forgotPasswordController=async(req,res)=>{
         res.status(200).json(result);
 
     } catch (error) {
-
+        
+       
         res.status(400).json({
             success: false,
             message: error.message
