@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API=axios.create({baseURL:"http://192.168.0.4:5000/api/auth"});
+const API = axios.create({ baseURL: "http://localhost:5000/api/auth" });
 
 export const sendOTP=(data)=>API.post("/send-otp",data);
 export const verifyOTP=(data)=>API.post("/verify-otp",data);
