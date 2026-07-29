@@ -7,7 +7,7 @@ import {authMiddleware} from "../middleware/authMiddleware.js";
 import { saveCodeController } from "../controllers/saveCodeController.js";
 
 const router=express.Router();
-console.log("✅ roomRoutes loaded");
+
 router.post("/create",authMiddleware,createRoomController);
 router.post("/join",authMiddleware,joinRoomController);
 router.get("/:roomId",authMiddleware,getRoomController);

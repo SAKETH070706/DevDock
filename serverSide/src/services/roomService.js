@@ -20,7 +20,7 @@ export const createRoom=async(roomName,language,hostId)=>
     });
 
     await redis.setex(`room:${inviteCode}`,INVITE_CODE_EXPIRY,room._id.toString());
-
+   console.log("Stored:", await redis.get(`room:${inviteCode}`));
     return {
         room,
         inviteCode
@@ -29,12 +29,18 @@ export const createRoom=async(roomName,language,hostId)=>
 
 
 export const joinRoom = async (inviteCode, userId) => {
-  const room = await Room.findOne({ inviteCode });
+  const roomId = await redis.get(`room:${inviteCode}`);
 
-  if (!room) {
-    throw new Error("Invalid invite code");
+  if (!roomId) {
+     throw new Error("Invite code expired or invalid");
   }
 
+ const room = await Room.findById(roomId);
+
+  if (!room || !room.isActive) {
+    throw new Error("Room not found");
+  }
+  
   const alreadyJoined = room.participants.some(
     (participant) => participant.toString() === userId.toString()
   );
@@ -47,13 +53,24 @@ export const joinRoom = async (inviteCode, userId) => {
   return room;
 };
 
+export const getRoomById = async (roomId, userId) => {
+    const room = await Room.findById(roomId).populate("host","username email").populate("participants","username email");
 
-export const getRoomById=async(roomId)=>{
-    const room=await Room.findById(roomId).populate("host","username email").populate("participants","username email");
     if (!room) {
-        throw new Error("Room not found");
+      throw new Error("Room not found");
     }
-    return room;
+
+    const isMember =
+      room.host._id.equals(userId) ||
+      room.participants.some(
+          p => p._id.equals(userId)
+      );
+
+    if (!isMember) {
+       throw new Error("Unauthorized");
+    } 
+
+   return room;
 };
 
 

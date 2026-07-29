@@ -10,8 +10,7 @@ import RoomHeader from "../components/room/RoomHeader.jsx";
 import EditorWorkspace from "../components/room/EditorWorkspace.jsx";
 import Sidebar from "../components/room/Sidebar.jsx";
 import {handleEditorMount} from "../yjs/handleEditorMount.js";
-import { getCode } from "../yjs/ydoc";
-
+import { getCode,getYDoc,removeYDoc } from "../yjs/ydoc";
 
 
 const Room = () => {
@@ -58,6 +57,13 @@ const {
   emitLanguageChange,
   navigate,
 });
+  useEffect(()=>{
+    if(!room) return ;
+    const {ytext}=getYDoc(roomId);
+    if (ytext.length === 0 && room.code) {
+       ytext.insert(0, room.code);
+    }
+  },[room,roomId]);
 
 
   const isHost = room?.host?._id?.toString() === user?._id;
@@ -68,28 +74,45 @@ const {
     editorCleanup.current = handleEditorMount(
         editor,
         roomId,
-        user
+        user,
+        room?.code || ""
     );
 };
+
+  const initialized = useRef(false);
+
+useEffect(() => {
+    const { ytext } = getYDoc(roomId);
+
+    let timer;
+
+    const observer = () => {
+        if (!initialized.current) {
+            initialized.current = true;
+            return;
+        }
+
+        clearTimeout(timer);
+
+        timer = setTimeout(async () => {
+            await saveCode(roomId, ytext.toString());
+        }, 2000);
+    };
+
+    ytext.observe(observer);
+
+    return () => {
+        clearTimeout(timer);
+        ytext.unobserve(observer);
+    };
+}, [roomId]);
 
 useEffect(() => {
     return () => {
         editorCleanup.current?.();
+        removeYDoc(roomId);
     };
-}, []);
-
-  useEffect(() => {
-    if (!roomId) return;
-    const timer = setTimeout(async () => {
-      try {
-        await saveCode(roomId,getCode(roomId));
-      } catch (error) {
-        console.log(error);
-      }
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, [roomId]);
-
+}, [roomId]);
  
 
   const handleSendMessage = () => {

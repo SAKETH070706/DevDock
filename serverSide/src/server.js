@@ -3,7 +3,8 @@ dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 import dotenv from "dotenv";
 dotenv.config();
-
+import jwt from "jsonwebtoken";
+import User from "./models/userModel.js";
 import express from "express";
 import cors from "cors";
 import http from "http";
@@ -21,22 +22,52 @@ const server=http.createServer(app);
 
 const io=new Server(server,{
     cors:{
-        origin:"http://localhost:5173",
+        origin: [process.env.CLIENT_URL],
         methods:["GET","POST"]
     }
 });
 app.set("io", io);
 
-app.use(cors());
+app.use(cors({
+    origin: process.env.CLIENT_URL,
+    credentials: true
+}));
 app.use(express.json());
 
-connectDB();
-connectRedis();
+await connectDB();
+await connectRedis();
 
 app.use("/api/auth", authRoutes);
 app.use("/api/rooms",roomRoutes);
 app.use("/api/compiler",compilerRoutes);
 
+io.use(async (socket, next) => {
+    try {
+        const token = socket.handshake.auth.token;
+
+        if (!token) {
+            return next(new Error("Authentication required"));
+        }
+
+        const decoded = jwt.verify(
+            token,
+            process.env.JWT_SECRET
+        );
+
+        const user = await User.findById(decoded.id);
+
+        if (!user) {
+            return next(new Error("Invalid user"));
+        }
+
+        socket.user = user;
+
+        next();
+
+    } catch (err) {
+        next(new Error("Authentication failed"));
+    }
+});
 socketHandler(io);
 
 const PORT = process.env.PORT || 5000;

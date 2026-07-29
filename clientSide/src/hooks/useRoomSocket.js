@@ -6,32 +6,31 @@ const useRoomSocket = ({ roomId, user, setLanguage,onRoomDisbanded,fetchRoom }) 
   const [messages, setMessages] = useState([]);
    
 
-  useEffect(() => {
+useEffect(() => {
     if (!user) return;
-     if(!socket.connected){
-         socket.connect();
-     }
-    const onConnect = () => {
 
-      socket.emit("join-room", {
-        roomId,
-        userId: user._id,
-      });
+    const joinRoom = () => {
+        socket.emit("join-room", {
+            roomId,
+        });
     };
 
-    socket.on("connect", onConnect);
+    if (!socket.connected) {
+        const token = localStorage.getItem("token");
+
+        socket.auth = { token };
+
+        socket.connect();
+
+        socket.once("connect", joinRoom);
+    } else {
+        joinRoom();
+    }
 
     return () => {
-      socket.off("connect", onConnect);
-
-      socket.emit("leave-room", {
-        roomId,
-        userId: user._id,
-      });
-
-      socket.disconnect();
+        socket.emit("leave-room", { roomId });
     };
-  }, [roomId, user]);
+}, [roomId, user]);
 
   useEffect(() => {
     socket.on("online-users", (users) => {
@@ -84,8 +83,6 @@ const useRoomSocket = ({ roomId, user, setLanguage,onRoomDisbanded,fetchRoom }) 
 
     socket.emit("chat-message", {
       roomId,
-      userId: user._id,
-      username: user.username,
       message,
     });
   };

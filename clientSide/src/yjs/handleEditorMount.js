@@ -5,8 +5,12 @@ import { createAwareness } from "./awareness.js";
 import { getUserColor } from "./colors.js";
 import {setupAwareness} from "./awarenessProvider.js";
 
-export const handleEditorMount = (editor, roomId,user) => {
-  const { ydoc, ytext } = getYDoc(roomId);
+export const handleEditorMount = (editor, roomId, user, initialCode) => {
+    const { ydoc, ytext } = getYDoc(roomId);
+
+    if (ytext.length === 0 && initialCode) {
+        ytext.insert(0, initialCode);
+    }
   const cleanupProvider = setupProvider(roomId, ydoc);
   const awareness = createAwareness(ydoc);
   setupAwareness(roomId, awareness);
