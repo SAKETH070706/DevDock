@@ -1,5 +1,7 @@
 # Dependencies
-node_modules/
+# Ignore all node_modules folders anywhere
+**/node_modules/
+
 
 # Environment variables
 .env
