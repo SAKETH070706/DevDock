@@ -15,15 +15,9 @@ import authRoutes from "./routes/authRoutes.js";
 import roomRoutes  from "./routes/roomRoutes.js";
 import socketHandler from "./socket/socketHandler.js";
 import compilerRoutes from "./routes/compilerRoutes.js";
-import { monitorEventLoopDelay } from "perf_hooks";
+
 
 const app = express();
-
-const eventLoopMonitor = monitorEventLoopDelay({ resolution: 20 });
-
-eventLoopMonitor.enable();
-
-
 
 const server=http.createServer(app);
 
@@ -81,20 +75,6 @@ io.use(async (socket, next) => {
     }
 });
 socketHandler(io);
-app.get("/debug/ping", (req, res) => {
-    res.json({ ok: true });
-});
-
-app.get("/debug/eventloop", (req, res) => {
-    res.json({
-        mean_ms: eventLoopMonitor.mean / 1e6,
-        p50_ms: eventLoopMonitor.percentile(50) / 1e6,
-        p99_ms: eventLoopMonitor.percentile(99) / 1e6,
-        max_ms: eventLoopMonitor.max / 1e6,
-    });
-
-    eventLoopMonitor.reset();
-});
 
 const PORT = process.env.PORT || 5000;
 
