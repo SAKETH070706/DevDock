@@ -1,5 +1,8 @@
 export const authMiddleware = async (req, res, next) =>
 {
+    console.log("🔥🔥🔥 AUTH MIDDLEWARE HIT 🔥🔥🔥");
+
+    const _t0 = process.hrtime.bigint();
     console.log("[AUTH TEST] Middleware reached");
 
     try {
