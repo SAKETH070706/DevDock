@@ -1,28 +1,16 @@
 import jwt from "jsonwebtoken";
 import User from "../models/userModel.js";
+import redis from "../config/redis.js";
+
+const USER_CACHE_EXPIRY = 5 * 60;
 
 export const authMiddleware = async (req, res, next) => {
-
     const _t0 = process.hrtime.bigint();
 
     try {
-
-        console.log("\n========== AUTH DEBUG ==========");
-
         const authHeader = req.headers.authorization;
 
-        console.log("[AUTH] Authorization header exists:",
-            !!authHeader
-        );
-
-        console.log("[AUTH] Authorization starts with Bearer:",
-            authHeader?.startsWith("Bearer")
-        );
-
         if (!authHeader || !authHeader.startsWith("Bearer")) {
-
-            console.log("[AUTH] ❌ Missing/invalid Authorization header");
-
             return res.status(401).json({
                 success: false,
                 message: "Access denied"
@@ -31,75 +19,75 @@ export const authMiddleware = async (req, res, next) => {
 
         const token = authHeader.split(" ")[1];
 
-        console.log("[AUTH] Token received:", !!token);
-        console.log("[AUTH] Token length:", token?.length);
-
-        // DO NOT PRINT JWT_SECRET OR THE FULL TOKEN
-
-        console.log("[AUTH] JWT_SECRET exists:",
-            !!process.env.JWT_SECRET
-        );
-
-        console.log("[AUTH] JWT_SECRET length:",
-            process.env.JWT_SECRET?.length
-        );
-
-        console.log("[AUTH] Verifying JWT...");
-
         const decoded = jwt.verify(
             token,
             process.env.JWT_SECRET
         );
 
-        console.log("[AUTH] ✅ JWT verified");
-        console.log("[AUTH] Decoded ID:", decoded.id);
-        console.log("[AUTH] Issued At:", decoded.iat);
-        console.log("[AUTH] Expires At:", decoded.exp);
+        const cacheKey = `user:${decoded.id}`;
 
         const _tUser0 = process.hrtime.bigint();
 
-        console.log("[AUTH] Finding user...");
+        let user;
 
-        const user = await User.findById(decoded.id)
-            .select("-password");
+        // =========================
+        // CHECK REDIS CACHE
+        // =========================
 
-        const _tUser1 = process.hrtime.bigint();
+        const cachedUser = await redis.get(cacheKey);
 
-        console.log(
-            `[BENCH] User.findById: ${Number(_tUser1 - _tUser0) / 1e6} ms`
-        );
+        if (cachedUser) {
+
+            user = JSON.parse(cachedUser);
+
+            const _tUser1 = process.hrtime.bigint();
+
+            console.log(
+                `[CACHE] USER HIT: ${Number(_tUser1 - _tUser0) / 1e6} ms`
+            );
+
+        } else {
+
+            // =========================
+            // CACHE MISS → MONGODB
+            // =========================
+
+            user = await User.findById(decoded.id)
+                .select("-password");
+
+            const _tUser1 = process.hrtime.bigint();
+
+            console.log(
+                `[CACHE] USER MISS: ${Number(_tUser1 - _tUser0) / 1e6} ms`
+            );
+
+            if (user) {
+                await redis.setex(
+                    cacheKey,
+                    USER_CACHE_EXPIRY,
+                    JSON.stringify(user)
+                );
+
+                console.log("[CACHE] USER STORED");
+            }
+        }
 
         if (!user) {
-
-            console.log("[AUTH] ❌ User not found");
-
             return res.status(401).json({
                 success: false,
                 message: "User not found"
             });
         }
 
-        console.log("[AUTH] ✅ User found:", user.username);
-
         req.user = user;
 
         req._benchStart = _t0;
-
-        console.log("[AUTH] ✅ Authentication successful");
-        console.log("================================\n");
 
         next();
 
     } catch (error) {
 
-        console.log("\n========== AUTH ERROR ==========");
-
-        console.log("[AUTH] Error name:", error.name);
-        console.log("[AUTH] Error message:", error.message);
-
-        console.log("[AUTH] Error stack:", error.stack);
-
-        console.log("================================\n");
+        console.error("[AUTH ERROR]", error.message);
 
         return res.status(401).json({
             success: false,
