@@ -81,6 +81,9 @@ io.use(async (socket, next) => {
     }
 });
 socketHandler(io);
+app.get("/debug/ping", (req, res) => {
+    res.json({ ok: true });
+});
 
 app.get("/debug/eventloop", (req, res) => {
     res.json({
