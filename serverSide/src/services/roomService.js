@@ -54,7 +54,11 @@ export const joinRoom = async (inviteCode, userId) => {
 };
 
 export const getRoomById = async (roomId, userId) => {
+    
+    const _t0 = process.hrtime.bigint();
     const room = await Room.findById(roomId).populate("host","username email").populate("participants","username email");
+    const _t1 = process.hrtime.bigint();
+    console.log(`[BENCH] Room query + populate: ${Number(_t1 - _t0) / 1e6} ms`);
 
     if (!room) {
       throw new Error("Room not found");

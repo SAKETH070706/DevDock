@@ -43,30 +43,19 @@ export const joinRoomController=async(req,res)=>{
 };
 
 export const getRoomController=async(req,res)=>{
+    const _tStart = req._benchStart ?? process.hrtime.bigint();
     try{
-       
         if (!mongoose.Types.ObjectId.isValid(req.params.roomId)) {
-             return res.status(400).json({
-              success: false,
-              message: "Invalid room id"
-        });
-     }
-        
-         const room = await getRoomById(req.params.roomId,req.user._id);
-        return res.status(200).json({
-                success: true,
-                room
-            });
-
-        } catch (error) {
-
-            return res.status(404).json({
-                success: false,
-                message: error.message
-            });
-
+             return res.status(400).json({ success: false, message: "Invalid room id" });
         }
-    
+        const room = await getRoomById(req.params.roomId,req.user._id);
+        const _tEnd = process.hrtime.bigint();
+        console.log(`[BENCH] getRoomController total (from authMiddleware entry): ${Number(_tEnd - _tStart) / 1e6} ms`);
+        return res.status(200).json({ success: true, room });
+    }
+    catch (error) {
+        return res.status(404).json({ success: false, message: error.message });
+    }
 };
 
 export const disbandRoomController=async(req,res)=>{

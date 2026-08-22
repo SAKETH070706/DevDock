@@ -37,6 +37,11 @@ app.use(express.json());
 await connectDB();
 await connectRedis();
 
+app.use((req, res, next) => {
+    req._arrivalTime = process.hrtime.bigint();
+    next();
+});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/rooms",roomRoutes);
 app.use("/api/compiler",compilerRoutes);

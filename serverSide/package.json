@@ -28,5 +28,8 @@
     "socket.io": "^4.8.3",
     "uuid": "^14.0.0",
     "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "autocannon": "^8.0.0"
   }
 }
